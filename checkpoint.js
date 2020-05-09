@@ -43,9 +43,14 @@ const {
 // allí la recursión
 
 var objContains = function (obj, prop, value) {
-  return value === prop.split('.').reduce(function (o, x) {
-    return (typeof o == "undefined" || o === null) ? o : o[x];
-  }, obj);
+  for (var clave in obj) {
+    if (clave === prop && obj[clave] === value) {
+      return true;
+    } else if (typeof (obj[clave]) === "object") {
+      return objContains(obj[clave], prop, value);
+    }
+  }
+  return false;
 }
 
 
@@ -60,10 +65,12 @@ var objContains = function (obj, prop, value) {
 // [Para más información del método: https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Array/isArray]
 
 var countArray = function (array) {
-  var suma = 0;
-  if (array.length == 0) {
-    return suma;
+  if (Array.isArray(array)) {
+    return array.reduce(function (acc, cur) {
+      return acc + countArray(cur);
+    }, 0);
   }
+  return array;
 }
 
 // ---------------------
@@ -200,22 +207,28 @@ LinkedList.prototype.reverse = function () {
 //    - mazoUserB = [6,9,10,3,6,4]
 
 var cardGame = function (mazoUserA, mazoUserB) {
-  while (mazoUserA.size() >= 0 && mazoUserB.size() >= 0) {
-    a = mazoUserA.dequeue();
-    b = mazoUserB.dequeue();
-    if (a > b) {
-      mazoUserA.enqueue(b);
-      if (mazoUserB.size() == 0) {
-        return "A wins!";
-      }
-    } else if (a < b) {
-      mazoUserB.enqueue(a);
-      if (mazoUserA.size() == 0) {
-        return "B wins!"
-      }
-    } else {
-      return "Game tie!";
+  var cartaUserA;
+  var cartaUserB;
+
+  while (mazoUserA.size() > 0 && mazoUserB.size() > 0) {
+    cartaUserA = mazoUserA.dequeue();
+    cartaUserB = mazoUserB.dequeue();
+    if (cartaUserA > cartaUserB) {
+      mazoUserA.enqueue(cartaUserA);
+      mazoUserA.enqueue(cartaUserB);
+    } else if (cartaUserA < cartaUserB) {
+      mazoUserB.enqueue(cartaUserB);
+      mazoUserB.enqueue(cartaUserA);
     }
+  }
+  if (mazoUserA.size() === 0 && mazoUserB.size() > 0) {
+    return "B wins!";
+  }
+  if (mazoUserA.size() > 0 && mazoUserB.size() === 0) {
+    return "A wins!";
+  }
+  if (mazoUserA.size() === 0 && mazoUserB.size() === 0) {
+    return "Game tie!"
   }
 }
 
